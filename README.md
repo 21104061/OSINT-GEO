@@ -35,7 +35,39 @@ OBSIDIAN OSINT is a self-contained geopolitical intelligence gathering and analy
 
 ---
 
-## 🚀 Quick Start
+## � Security
+
+### Security Configuration
+This application includes hardened security settings:
+
+**CORS Protection:**
+- Restricted to specified origins (default: `localhost:3000`, `localhost:5000`)
+- Limited HTTP methods (GET, POST, OPTIONS)
+- No wildcard origins or credentials by default
+- Updated to Flask-CORS 5.1.0 with case sensitivity and regex matching fixes
+
+**Session Security:**
+- HttpOnly cookies prevent JavaScript access
+- SameSite protection against CSRF attacks
+- Secure cookie transmission (HTTPS in production)
+- Session timeout: 1 hour
+- Proper `Vary: Cookie` headers for cache control
+
+**Dependency Updates:**
+- Flask 3.1.4 - Session signing key and Vary header fixes
+- Flask-CORS 5.1.0 - CORS header and matching vulnerabilities patched
+- Requests 2.33.0 - .netrc leak and temp file reuse vulnerabilities fixed
+
+### Configuration Notes
+**⚠️ For Production Deployment:**
+1. Update the CORS origins in `backend.py` to your actual frontend URL
+2. Set `SESSION_COOKIE_SECURE = True` ensures HTTPS-only transmission
+3. Set environment variables or use a `.env` file for sensitive config
+4. Use a production-grade WSGI server (Gunicorn, uWSGI) instead of Flask's debug server
+
+---
+
+## �🚀 Quick Start
 
 ### Prerequisites
 - Modern web browser (Chrome, Firefox, Edge)

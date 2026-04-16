@@ -2,6 +2,7 @@
 """
 OBSIDIAN OSINT - Cross-Platform Setup Script
 Automatically installs and runs the application on Windows, macOS, and Linux
+Security Updates: Flask 3.1.4, Flask-CORS 5.1.0, Requests 2.33.0
 """
 
 import os
