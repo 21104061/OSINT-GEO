@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OBSIDIAN SIGINT TERMINAL</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <!-- Inter for modern UI, JetBrains Mono for logs -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+    <style>
+        :root {
+            --void-black: #060b13;
+            --phantom-gray: rgba(10, 25, 47, 0.65);
+            --tungsten: rgba(45, 112, 189, 0.25);
+            --glass-border: rgba(100, 255, 218, 0.15);
+            --electric-ice: #64ffda;
+            --signal-blue: #2196f3;
+            --threat-critical: #ff3366;
+            --threat-high: #ff8833;
+            --threat-medium: #ffcc00;
+            --threat-low: #00e676;
+            --bg-glow: radial-gradient(circle at 50% -20%, rgba(2, 40, 90, 0.9), var(--void-black) 70%);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--void-black);
+            background-image: var(--bg-glow);
+            color: #ccd6f6;
+            height: 100vh;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Status Rail */
+        .status-rail {
+            height: 40px;
+            background: rgba(6, 11, 19, 0.8);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--glass-border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 20px;
+            font-size: 11px;
+            font-family: 'JetBrains Mono', monospace;
+            z-index: 1000;
+        }
+        .utc-clock { color: var(--electric-ice); }
+        .latency-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--electric-ice); animation: pulse 2s infinite; display: inline-block; }
+
+        @keyframes pulse { 0%, 100% { opacity: 1; box-shadow: 0 0 8px var(--electric-ice); } 50% { opacity: 0.3; box-shadow: none; } }
+
+        /* Filter Bar */
+        .filter-bar {
+            padding: 10px 20px;
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            border-bottom: 1px solid rgba(100, 255, 218, 0.05);
+            z-index: 900;
+        }
+        select, .action-btn {
+            background: var(--phantom-gray);
+            color: var(--electric-ice);
+            border: 1px solid var(--glass-border);
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-family: 'Inter', sans-serif;
+            font-size: 11px;
+            outline: none;
+            cursor: pointer;
+            backdrop-filter: blur(5px);
+            transition: all 0.2s;
+        }
+        select:hover, .action-btn:hover { border-color: var(--electric-ice); box-shadow: 0 0 10px rgba(100, 255, 218, 0.2); }
+        .action-btn { font-weight: 600; text-transform: uppercase; letter-spacing: 1px; }
+
+        /* App Layout */
+        .app-container {
+            display: flex;
+            flex: 1;
+            height: calc(100vh - 140px); /* Account for top bars and bottom search */
+            position: relative;
+        }
+
+        /* Left Nav */
+        .nav-rail {
+            width: 70px;
+            background: rgba(6, 11, 19, 0.5);
+            border-right: 1px solid var(--glass-border);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px 0;
+            gap: 20px;
+            z-index: 999;
+        }
+        .nav-icon {
+            width: 40px; height: 40px;
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer; border-radius: 10px;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+        .nav-icon svg { width: 22px; height: 22px; stroke: #8892b0; fill: none; stroke-width: 1.5; transition: stroke 0.3s; }
+        .nav-icon:hover { background: var(--tungsten); }
+        .nav-icon:hover svg { stroke: var(--electric-ice); }
+        .nav-icon.active { background: rgba(100, 255, 218, 0.1); border: 1px solid var(--glass-border); }
+        .nav-icon.active svg { stroke: var(--electric-ice); filter: drop-shadow(0 0 5px var(--electric-ice)); }
+        
+        /* Tooltips */
+        .nav-icon::after {
+            content: attr(data-tooltip);
+            position: absolute; left: 55px;
+            background: var(--phantom-gray); border: 1px solid var(--glass-border);
+            padding: 5px 8px; font-size: 10px; border-radius: 4px;
+            white-space: nowrap; opacity: 0; pointer-events: none;
+            transition: opacity 0.2s; color: #ccd6f6; font-family: 'Inter', sans-serif;
+            backdrop-filter: blur(4px);
+        }
+        .nav-icon:hover::after { opacity: 1; }
+
+        /* Main Workspace */
+        .workspace { flex: 1; padding: 20px; display: flex; flex-direction: column; overflow: hidden; position: relative; }
+        
+        .bento-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            grid-template-rows: 1.2fr 1fr;
+            gap: 15px;
+            height: 100%;
+        }
+
+        .bento-card {
+            background: var(--phantom-gray);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.3);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            transition: border-color 0.3s;
+        }
+        .bento-card:hover { border-color: rgba(100, 255, 218, 0.4); }
+        
+        .card-header {
+            padding: 10px 15px;
+            font-size: 10px;
+            font-family: 'JetBrains Mono', monospace;
+            color: var(--electric-ice);
+            border-bottom: 1px solid var(--glass-border);
+            background: rgba(0, 0, 0, 0.2);
+            letter-spacing: 1px;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+
+        /* Map Settings */
+        .map-section { position: relative; grid-row: span 1; }
+        #geospatial-map { height: 100%; width: 100%; background: #000; }
+        .map-section.maximized {
+            position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+            z-index: 5000; border-radius: 0; border: none; height: 100%;
+        }
+
+        /* Leaflet Overrides */
+        .leaflet-container { background: #000 !important; font-family: 'Inter', sans-serif !important; }
+        .leaflet-tile-pane { filter: contrast(1.1) brightness(0.9) !important; } /* Clearer, brighter map */
+        .leaflet-control-zoom a { background: var(--phantom-gray) !important; color: var(--electric-ice) !important; border: 1px solid var(--glass-border) !important; }
+
+        .map-node {
+            width: 10px; height: 10px; border-radius: 50%;
+            background: var(--electric-ice);
+            box-shadow: 0 0 12px var(--electric-ice);
+            animation: nodePulse 2s infinite;
+        }
+        @keyframes nodePulse { 0%, 100% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.6); opacity: 0.5; } }
+        
+        .threat-critical { background: var(--threat-critical) !important; box-shadow: 0 0 12px var(--threat-critical) !important; }
+        .threat-high { background: var(--threat-high) !important; box-shadow: 0 0 12px var(--threat-high) !important; }
+        .threat-medium { background: var(--threat-medium) !important; box-shadow: 0 0 12px var(--threat-medium) !important; }
+
+        .intel-popup { padding: 5px; background: rgba(10,25,47,0.9); }
+        .intel-popup strong { color: var(--electric-ice); font-size: 11px; }
+        .popup-summary { margin-top: 5px; font-size: 10px; color: #ccd6f6; line-height: 1.4; }
+
+        /* Feed */
+        .feed-section { grid-row: span 2; }
+        .intel-feed { overflow-y: auto; padding: 10px; height: 100%; scrollbar-width: thin; scrollbar-color: var(--glass-border) transparent; }
+        
+        .intel-item {
+            padding: 12px;
+            margin-bottom: 10px;
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            transition: all 0.2s;
+        }
+        .intel-item:hover { background: rgba(100, 255, 218, 0.05); transform: translateY(-2px); border-color: var(--glass-border); }
+        
+        .intel-category { font-size: 9px; font-family: 'JetBrains Mono'; color: #8892b0; margin-bottom: 6px; }
+        .intel-summary { 
+            font-size: 13px; font-weight: 500; color: #e2e8f0; 
+            text-decoration: none; display: block; line-height: 1.4; 
+        }
+        .intel-summary:hover { color: var(--electric-ice); text-decoration: underline; }
+        
+        .intel-meta {
+            display: flex; gap: 10px; margin-top: 8px; font-size: 10px; align-items: center; color: #8892b0;
+        }
+        .threat-badge { 
+            padding: 3px 6px; border-radius: 4px; font-weight: bold; font-family: 'JetBrains Mono'; font-size: 9px;
+            color: #000;
+        }
+        
+        /* Omni Search */
+        .omni-search {
+            height: 50px;
+            background: rgba(6, 11, 19, 0.8);
+            border-top: 1px solid var(--glass-border);
+            display: flex; align-items: center; padding: 0 20px;
+            font-family: 'JetBrains Mono';
+        }
+        #command-input {
+            flex: 1; background: transparent; border: none; outline: none; color: var(--electric-ice); font-size: 13px; font-family: inherit;
+        }
+        .command-prompt { color: var(--electric-ice); margin-right: 15px; font-weight: bold; }
+        
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: var(--glass-border); border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--electric-ice); }
+
+        .hidden { display: none !important; }
+    </style>
+</head>
+<body>
+
+    <div class="status-rail">
+        <div>ID: <span id="session-id">LOADING</span> | SIGINT DIRECT SECURE</div>
+        <div><div class="latency-dot"></div> <span id="utc-clock">00:00:00</span> UTC</div>
+    </div>
+
+    <!-- Active Filters -->
+    <div class="filter-bar">
+        <select id="filter-timezone" onchange="renderUI()">
+            <option value="UTC">🕒 UTC (Zulu)</option>
+            <option value="local">🕒 Local System Time</option>
+            <option value="America/New_York">🕒 EST (New York)</option>
+            <option value="Europe/London">🕒 GMT (London)</option>
+            <option value="Asia/Dubai">🕒 GST (Dubai)</option>
+            <option value="Asia/Tokyo">🕒 JST (Tokyo)</option>
+        </select>
+        <select id="filter-timeframe" onchange="fetchIntelligence()">
+            <option value="all">📅 ALL TIME (DEFAULT)</option>
+            <option value="24">📅 PAST 24 HOURS</option>
+            <option value="168">📅 PAST 7 DAYS</option>
+            <option value="720">📅 PAST 30 DAYS</option>
+        </select>
+        <div style="width:1px; height:20px; background:var(--glass-border); margin:0 5px;"></div>
+        <select id="filter-region" onchange="fetchIntelligence()">
+            <option value="all">🌍 ALL REGIONS</option>
+            <option value="Global">Global Unspecified</option>
+            <option value="North America">North America</option>
+            <option value="Europe">Europe</option>
+            <option value="Asia">Asia</option>
+            <option value="Middle East">Middle East</option>
+        </select>
+        <select id="filter-category" onchange="fetchIntelligence()">
+            <option value="all">⚡ ALL TYPES</option>
+            <option value="attacks">KINETIC ATTACKS</option>
+            <option value="diplomatic">DIPLOMATIC</option>
+            <option value="economic">ECONOMIC</option>
+            <option value="conflicts">CONFLICTS</option>
+        </select>
+        <div style="flex: 1;"></div>
+        <button class="action-btn" id="map-expand-btn" onclick="toggleMapFullscreen()">⛶ Expand Map</button>
+        <button class="action-btn" onclick="triggerGather()">🔄 Sync Feeds</button>
+    </div>
+
+    <div class="app-container">
+        <!-- Lean Functional Left Nav -->
+        <div class="nav-rail">
+            <div class="nav-icon active" data-tooltip="Dashboard View" onclick="switchMainView('dashboard', this)">
+                <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+            </div>
+            <div class="nav-icon" data-tooltip="Comms / Log Stream" onclick="switchMainView('logs', this)">
+                <svg viewBox="0 0 24 24"><polyline points="4 17 10 11 4 5"></polyline><line x1="12" y1="19" x2="20" y2="19"></line></svg>
+            </div>
+        </div>
+
+        <div class="workspace">
+            <div class="bento-grid" id="main-grid">
+                
+                <!-- Map -->
+                <div class="bento-card map-section" id="map-container">
+                    <div class="card-header">
+                        <span>GEOSPATIAL.TRACKER</span>
+                        <span style="color: #8892b0">LOCKED</span>
+                    </div>
+                    <div id="geospatial-map"></div>
+                </div>
+
+                <!-- Feed Stream -->
+                <div class="bento-card feed-section">
+                    <div class="card-header">INTELLIGENCE.FEED</div>
+                    <div class="intel-feed" id="intel-feed">
+                        <div style="padding: 20px; color: #8892b0; text-align: center; font-family: 'Inter';">Initializing Secure Link...</div>
+                    </div>
+                </div>
+                
+                <!-- System Logs -->
+                <div class="bento-card hidden" id="log-container" style="grid-column: span 2;">
+                    <div class="card-header">SYSTEM.EVENT_LOG</div>
+                    <div class="intel-feed" id="waterfall-log" style="font-family: 'JetBrains Mono'; font-size: 11px;"></div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <div class="omni-search">
+        <span class="command-prompt">></span>
+        <input type="text" id="command-input" placeholder="Execute overrides or type '/help'..." autocomplete="off">
+    </div>
+
+<script>
+    const CONFIG = {
+        apiUrl: 'http://127.0.0.1:5000',
+        updateInterval: 15000
+    };
+    
+    let map = null;
+    let markers = [];
+    let intelligenceData = [];
+
+    document.getElementById('session-id').textContent = Math.random().toString(36).substring(2, 8).toUpperCase();
+    
+    // Core Clock
+    setInterval(() => {
+        document.getElementById('utc-clock').textContent = new Date().toISOString().substring(11, 19);
+    }, 1000);
+
+    // Initial Map Setup
+    function initMap() {
+        if(map) return;
+        map = L.map('geospatial-map', { center: [30, 0], zoom: 2, zoomControl: true, attributionControl: false });
+        L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', { maxZoom: 12 }).addTo(map);
+    }
+
+    // Toggle Map Fullscreen
+    function toggleMapFullscreen() {
+        const mapContainer = document.getElementById('map-container');
+        const btn = document.getElementById('map-expand-btn');
+        mapContainer.classList.toggle('maximized');
+        
+        if (mapContainer.classList.contains('maximized')) {
+            btn.innerHTML = '✕ Collapse Map';
+        } else {
+            btn.innerHTML = '⛶ Expand Map';
+        }
+        
+        // Force Leaflet to recalculate canvas height after CSS repaints
+        setTimeout(() => { map.invalidateSize(); }, 300);
+    }
+
+    // Switch Left Rail Nav Views
+    function switchMainView(view, btnElement) {
+        document.querySelectorAll('.nav-icon').forEach(n => n.classList.remove('active'));
+        btnElement.classList.add('active');
+        
+        const mapSec = document.getElementById('map-container');
+        const logSec = document.getElementById('log-container');
+        
+        if (view === 'dashboard') {
+            mapSec.classList.remove('hidden');
+            logSec.classList.add('hidden');
+            setTimeout(() => { map.invalidateSize(); }, 100);
+        } else if (view === 'logs') {
+            mapSec.classList.add('hidden');
+            logSec.classList.remove('hidden');
+        }
+    }
+
+    function addLog(msg) {
+        const log = document.getElementById('waterfall-log');
+        const d = document.createElement('div');
+        d.style.marginBottom = "4px";
+        d.style.color = "#8892b0";
+        d.innerHTML = `<span style="color:var(--electric-ice)">[${new Date().toLocaleTimeString()}]</span> ${msg}`;
+        log.prepend(d);
+        if(log.children.length > 50) log.removeChild(log.lastChild);
+    }
+
+    async function triggerGather() {
+        addLog("Manual Sync Initiated");
+        try {
+            await fetch(`${CONFIG.apiUrl}/api/gather`, { method: 'POST' });
+            fetchIntelligence();
+        } catch(e) {
+            addLog("Sync failed: " + e.message);
+        }
+    }
+
+    // Main Fetch
+    async function fetchIntelligence() {
+        const cat = document.getElementById('filter-category').value;
+        const reg = document.getElementById('filter-region').value;
+        const tframe = document.getElementById('filter-timeframe').value;
+        const url = `${CONFIG.apiUrl}/api/intelligence?limit=50&category=${cat}&region=${reg}&timeframe=${tframe}`;
+        
+        try {
+            const response = await fetch(url);
+            if (!response.ok) throw new Error("API Offline");
+            intelligenceData = await response.json();
+            renderUI();
+            addLog(`Fetched ${intelligenceData.length} intel items (Filters - R:${reg} C:${cat})`);
+        } catch (error) {
+            addLog(`Fetch Error: Using Mock Fallback Data`);
+            loadMockData(); // Instantly fallback to offline coordinates!
+        }
+    }
+
+    function renderUI() {
+        if (!map) initMap();
+        
+        // Clear old markers
+        markers.forEach(m => map.removeLayer(m));
+        markers = [];
+        
+        const feed = document.getElementById('intel-feed');
+        feed.innerHTML = '';
+        
+        intelligenceData.forEach(intel => {
+            // Render Feed Card
+            const item = document.createElement('div');
+            item.className = 'intel-item';
+            const cat = intel.category.toUpperCase().substring(0, 3);
+            
+            // Timezone logic
+            const tzPref = document.getElementById('filter-timezone').value;
+            const dateObj = new Date(intel.timestamp);
+            let timeStr = "";
+            let tzLabel = tzPref === 'local' ? 'LOCAL' : tzPref.split('/')[1] || tzPref;
+            
+            if (tzPref === 'local') {
+                timeStr = dateObj.toLocaleString(undefined, { month: 'short', day: 'numeric', hour: '2-digit', minute:'2-digit' });
+            } else {
+                timeStr = dateObj.toLocaleString('en-US', { timeZone: tzPref, month: 'short', day: 'numeric', hour: '2-digit', minute:'2-digit', hour12: false });
+            }
+
+            const threatBadge = `threat-${intel.threatLevel?.toLowerCase() || 'low'}`;
+            
+            item.innerHTML = `
+                <div class="intel-category">[${cat}] ${timeStr} ${tzLabel.toUpperCase()} | SRC: ${intel.source_type || 'SYSTEM'}</div>
+                <a href="${intel.source || '#'}" target="_blank" class="intel-summary">${intel.summary}</a>
+                <div class="intel-meta">
+                    <span class="threat-badge ${threatBadge}">${intel.threatLevel || 'LOW'}</span>
+                    <span>LOC: ${intel.where || 'Unknown'}</span>
+                </div>
+            `;
+            feed.appendChild(item);
+
+            // Render Map Node
+            if (intel.location && intel.location.lat) {
+                const icon = L.divIcon({
+                    className: '',
+                    html: `<div class="map-node ${threatBadge}"></div>`,
+                    iconSize: [10, 10], iconAnchor: [5, 5]
+                });
+                
+                const marker = L.marker([intel.location.lat, intel.location.lon], { icon }).addTo(map);
+                marker.bindPopup(`
+                    <div class="intel-popup">
+                        <strong>[${cat}] ${intel.location.name}</strong>
+                        <div class="popup-summary">${intel.summary}</div>
+                    </div>
+                `);
+                markers.push(marker);
+            }
+        });
+    }
+
+    function loadMockData() {
+        intelligenceData = [
+            { category: 'attacks', summary: 'KINETIC STRIKE DETECTED', where: 'Eastern Mediterranean', location: {lat: 35.0, lon: 34.0, name: 'Eastern Mediterranean'}, threatLevel: 'Critical', timestamp: new Date().toISOString() },
+            { category: 'threats', summary: 'NAVAL BUILDUP CONFIRMED', where: 'South China Sea', location: {lat: 12.0, lon: 113.0, name: 'South China Sea'}, threatLevel: 'High', timestamp: new Date().toISOString() }
+        ];
+        renderUI();
+    }
+
+    // Command Parser
+    document.getElementById('command-input').addEventListener('keydown', (e) => {
+        if(e.key === 'Enter') {
+            const cmd = e.target.value.trim();
+            addLog(`> ${cmd}`);
+            if(cmd === '/fetch') fetchIntelligence();
+            if(cmd === '/clear') document.getElementById('waterfall-log').innerHTML = '';
+            e.target.value = '';
+        }
+    });
+
+    // Boot
+    setTimeout(() => { fetchIntelligence(); }, 500);
+    setInterval(fetchIntelligence, CONFIG.updateInterval);
+
+</script>
+</body>
+</html>
