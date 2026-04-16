@@ -37,6 +37,14 @@ app.config['SESSION_COOKIE_HTTPONLY'] = True  # Prevent JavaScript access
 app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'  # CSRF protection
 app.config['PERMANENT_SESSION_LIFETIME'] = 3600  # 1 hour session timeout
 
+# Ensure Vary: Cookie header is sent with session responses
+@app.after_request
+def add_vary_cookie_header(response):
+    """Add Vary: Cookie header to ensure proper caching behavior"""
+    if 'Set-Cookie' in response.headers or request.cookies:
+        response.vary.add('Cookie')
+    return response
+
 # Configure CORS with security restrictions
 CORS(app, 
      resources={
