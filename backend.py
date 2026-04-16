@@ -31,6 +31,12 @@ logger = logging.getLogger(__name__)
 # Initialize Flask app
 app = Flask(__name__)
 
+# Secure session configuration (prevents fallback key usage)
+app.config['SESSION_COOKIE_SECURE'] = True  # Only send over HTTPS in production
+app.config['SESSION_COOKIE_HTTPONLY'] = True  # Prevent JavaScript access
+app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'  # CSRF protection
+app.config['PERMANENT_SESSION_LIFETIME'] = 3600  # 1 hour session timeout
+
 # Configure CORS with security restrictions
 CORS(app, 
      resources={
