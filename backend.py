@@ -30,7 +30,20 @@ logger = logging.getLogger(__name__)
 
 # Initialize Flask app
 app = Flask(__name__)
-CORS(app)
+
+# Configure CORS with security restrictions
+CORS(app, 
+     resources={
+         r"/*": {
+             "origins": ["http://localhost:3000", "http://localhost:5000"],  # Specify allowed origins
+             "methods": ["GET", "POST", "OPTIONS"],
+             "allow_headers": ["Content-Type"],
+             "expose_headers": ["Content-Type"],
+             "supports_credentials": False,
+             "max_age": 3600,
+             "send_wildcard": False
+         }
+     })
 
 # Local data storage
 if getattr(sys, 'frozen', False):
