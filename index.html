@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>OBSIDIAN SIGINT TERMINAL</title>
+    <title>OSINT EDUCATIONAL TRACKER</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <!-- Inter for modern UI, JetBrains Mono for logs -->
@@ -18,10 +18,10 @@
             --glass-border: rgba(100, 255, 218, 0.15);
             --electric-ice: #64ffda;
             --signal-blue: #2196f3;
-            --threat-critical: #ff3366;
-            --threat-high: #ff8833;
-            --threat-medium: #ffcc00;
-            --threat-low: #00e676;
+            --threat-critical: #e040fb; /* Pinkish-Purple (Major) */
+            --threat-high: #00bcd4; /* Cyan (Significant) */
+            --threat-medium: #ffeb3b; /* Yellow (Moderate) */
+            --threat-low: #00e676; /* Green (Standard) */
             --bg-glow: radial-gradient(circle at 50% -20%, rgba(2, 40, 90, 0.9), var(--void-black) 70%);
         }
 
@@ -244,7 +244,7 @@
 <body>
 
     <div class="status-rail">
-        <div>ID: <span id="session-id">LOADING</span> | SIGINT DIRECT SECURE</div>
+        <div>ID: <span id="session-id">LOADING</span> | GLOBAL CURRENT AFFAIRS SECURE LINK</div>
         <div><div class="latency-dot"></div> <span id="utc-clock">00:00:00</span> UTC</div>
     </div>
 
@@ -272,13 +272,18 @@
             <option value="Europe">Europe</option>
             <option value="Asia">Asia</option>
             <option value="Middle East">Middle East</option>
+            <option value="India">India</option>
         </select>
         <select id="filter-category" onchange="fetchIntelligence()">
             <option value="all">⚡ ALL TYPES</option>
-            <option value="attacks">KINETIC ATTACKS</option>
-            <option value="diplomatic">DIPLOMATIC</option>
-            <option value="economic">ECONOMIC</option>
-            <option value="conflicts">CONFLICTS</option>
+            <option value="national">NATIONAL</option>
+            <option value="international">INTERNATIONAL</option>
+            <option value="economy">ECONOMY</option>
+            <option value="science_tech">SCIENCE & TECH</option>
+            <option value="defense">DEFENSE</option>
+            <option value="environment">ENVIRONMENT</option>
+            <option value="sports">SPORTS</option>
+            <option value="current_affairs">CURRENT AFFAIRS</option>
         </select>
         <div style="flex: 1;"></div>
         <button class="action-btn" id="map-expand-btn" onclick="toggleMapFullscreen()">⛶ Expand Map</button>
@@ -302,7 +307,7 @@
                 <!-- Map -->
                 <div class="bento-card map-section" id="map-container">
                     <div class="card-header">
-                        <span>GEOSPATIAL.TRACKER</span>
+                        <span>GLOBAL.EVENTS.TRACKER</span>
                         <span style="color: #8892b0">LOCKED</span>
                     </div>
                     <div id="geospatial-map"></div>
@@ -310,7 +315,7 @@
 
                 <!-- Feed Stream -->
                 <div class="bento-card feed-section">
-                    <div class="card-header">INTELLIGENCE.FEED</div>
+                    <div class="card-header">NEWS.FEED</div>
                     <div class="intel-feed" id="intel-feed">
                         <div style="padding: 20px; color: #8892b0; text-align: center; font-family: 'Inter';">Initializing Secure Link...</div>
                     </div>
@@ -490,8 +495,8 @@
 
     function loadMockData() {
         intelligenceData = [
-            { category: 'attacks', summary: 'KINETIC STRIKE DETECTED', where: 'Eastern Mediterranean', location: {lat: 35.0, lon: 34.0, name: 'Eastern Mediterranean'}, threatLevel: 'Critical', timestamp: new Date().toISOString() },
-            { category: 'threats', summary: 'NAVAL BUILDUP CONFIRMED', where: 'South China Sea', location: {lat: 12.0, lon: 113.0, name: 'South China Sea'}, threatLevel: 'High', timestamp: new Date().toISOString() }
+            { category: 'national', summary: 'MAJOR POLICY UPDATE ISSUED', where: 'New Delhi', location: {lat: 28.6, lon: 77.2, name: 'New Delhi'}, threatLevel: 'Critical', timestamp: new Date().toISOString() },
+            { category: 'international', summary: 'G20 SUMMIT CONCLUDES', where: 'Geneva', location: {lat: 46.2, lon: 6.1, name: 'Geneva'}, threatLevel: 'High', timestamp: new Date().toISOString() }
         ];
         renderUI();
     }

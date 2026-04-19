@@ -80,7 +80,7 @@ geolocator = Nominatim(user_agent="obsidian_osint_engine_v1")
 
 # Configuration
 CONFIG = {
-    'max_intelligence': 500,
+    'max_intelligence': 2000,
     'update_interval': 300,  # 5 minutes
     'cache_ttl': 3600,
     'batch_size': 20,
@@ -92,15 +92,16 @@ CONFIG = {
 NEWS_SOURCES = {
     'rss_feeds': [
         'http://feeds.bbci.co.uk/news/world/rss.xml',
-        'https://feeds.bloomberg.com/markets/news.rss',
-        'https://www.cnbc.com/id/100003114/device/rss/rss.html',
         'https://feeds.Reuters.com/reuters/worldNews',
         'https://feeds.aljazeera.com/AJEng/NorthAmerica',
         'https://feeds.aljazeera.com/AJEng/MiddleEast',
         'https://feeds.aljazeera.com/AJEng/AsiaPacific',
-        'https://feeds.aljazeera.com/AJEng/Africa',
-        'https://feeds2.bloomberg.com/defense-spending.rss',
-        'https://feeds.defense.gov/rss/defense-dod-news.xml',
+        'https://www.thehindu.com/news/national/feeder/default.rss',
+        'https://indianexpress.com/section/india/feed/',
+        'https://feeds.feedburner.com/ndtvnews-top-stories',
+        'https://www.hindustantimes.com/feeds/rss/india-news/rssfeed.xml',
+        'https://news.google.com/rss/search?q=India+current+affairs+competitive+exams+when:30d&hl=en-IN&gl=IN&ceid=IN:en',
+        'https://news.google.com/rss/search?q=Global+current+affairs+when:30d&hl=en-US&gl=US&ceid=US:en',
     ],
     'gnews_api': 'https://gnews.io/api/v4/search',  # Free gnews API for supplementary lookup
 }
@@ -108,28 +109,28 @@ NEWS_SOURCES = {
 # Keywords for threat assessments
 THREAT_KEYWORDS = {
     'critical': {
-        'keywords': ['nuclear', 'weapons', 'war declared', 'invasion', 'military strike', 'bombing', 'killed', 'casualties', 'destroyed', 'missile', 'attack'],
+        'keywords': ['supreme court', 'major policy', 'amendment', 'budget', 'prime minister', 'president', 'isro', 'summit', 'brics', 'historic', 'nuclear', 'war'],
         'weight': 4.0
     },
     'high': {
-        'keywords': ['military', 'armed forces', 'threat', 'sanctions', 'conflict', 'tensions', 'buildup', 'mobilization', 'exercise', 'deployment', 'warship', 'aircraft'],
+        'keywords': ['parliament', 'election', 'rbi', 'economic', 'international', 'climate', 'defense', 'military', 'threat', 'conflict', 'sanctions'],
         'weight': 2.5
     },
     'medium': {
-        'keywords': ['warning', 'alert', 'incident', 'border', 'diplomatic', 'investigation', 'response', 'alleged', 'claim'],
+        'keywords': ['state government', 'scheme', 'court hearing', 'statement', 'visit', 'report', 'index ranking', 'appointment', 'award', 'warning', 'incident', 'diplomatic'],
         'weight': 1.5
     }
 }
 
 CATEGORIES = {
-    'attacks': ['attack', 'strike', 'bombing', 'assault', 'explosive', 'violence', 'killed', 'wounded'],
-    'threats': ['threat', 'tensions', 'buildup', 'mobilization', 'warning', 'alert', 'escalation'],
-    'conflicts': ['war', 'conflict', 'invasion', 'military operation', 'hostilities', 'combat', 'engagement'],
-    'diplomatic': ['sanctions', 'treaty', 'alliance', 'summit', 'negotiations', 'ambassador', 'statement'],
-    'intelligence': ['espionage', 'cyber', 'hacking', 'leak', 'surveillance', 'data breach', 'security'],
-    'economic': ['trade', 'tariff', 'commerce', 'export', 'import', 'currency', 'market'],
-    'naval': ['navy', 'fleet', 'warship', 'submarine', 'carrier', 'destroyer', 'maritime'],
-    'cyber': ['cyber', 'hacking', 'breach', 'malware', 'ransomware', 'attack', 'network'],
+    'national': ['india', 'government', 'supreme court', 'parliament', 'lok sabha', 'rajya sabha', 'minister', 'scheme', 'yojana', 'policy'],
+    'international': ['summit', 'treaty', 'alliance', 'un', 'united nations', 'g20', 'brics', 'asean', 'diplomacy', 'foreign', 'ambassador'],
+    'economy': ['trade', 'tariff', 'commerce', 'export', 'import', 'currency', 'market', 'financial', 'gdp', 'inflation', 'rbi', 'budget', 'finance'],
+    'science_tech': ['science', 'space', 'technology', 'isro', 'drdo', 'nasa', 'satellite', 'research', 'innovation', 'ai'],
+    'defense': ['military', 'navy', 'army', 'air force', 'missile', 'exercise', 'defense', 'warship', 'security'],
+    'environment': ['climate', 'environment', 'pollution', 'warming', 'green', 'sustainable', 'wildlife', 'conservation', 'cop'],
+    'sports': ['olympics', 'world cup', 'cricket', 'bcci', 'fifa', 'tournament', 'championship', 'athlete'],
+    'current_affairs': ['current affairs', 'general knowledge', 'education', 'exam', 'upsc', 'ssc']
 }
 
 ACTORS = {
@@ -168,6 +169,37 @@ LOCATION_COORDS = {
     'persian gulf': {'lat': 26.0, 'lon': 52.0, 'name': 'Persian Gulf', 'region': 'Strategic Waterway'},
     'taiwan strait': {'lat': 24.5, 'lon': 119.5, 'name': 'Taiwan Strait', 'region': 'Strategic Waterway'},
     'red sea': {'lat': 20.0, 'lon': 38.0, 'name': 'Red Sea', 'region': 'Strategic Waterway'},
+    'andhra pradesh': {'lat': 15.9129, 'lon': 79.7400, 'name': 'Andhra Pradesh, India', 'region': 'India'},
+    'arunachal pradesh': {'lat': 28.2180, 'lon': 94.7278, 'name': 'Arunachal Pradesh, India', 'region': 'India'},
+    'assam': {'lat': 26.2006, 'lon': 92.9376, 'name': 'Assam, India', 'region': 'India'},
+    'bihar': {'lat': 25.0961, 'lon': 85.3131, 'name': 'Bihar, India', 'region': 'India'},
+    'chhattisgarh': {'lat': 21.2787, 'lon': 81.8661, 'name': 'Chhattisgarh, India', 'region': 'India'},
+    'goa': {'lat': 15.2993, 'lon': 74.1240, 'name': 'Goa, India', 'region': 'India'},
+    'gujarat': {'lat': 22.2587, 'lon': 71.1924, 'name': 'Gujarat, India', 'region': 'India'},
+    'haryana': {'lat': 29.0588, 'lon': 76.0856, 'name': 'Haryana, India', 'region': 'India'},
+    'himachal pradesh': {'lat': 31.1048, 'lon': 77.1665, 'name': 'Himachal Pradesh, India', 'region': 'India'},
+    'jharkhand': {'lat': 23.6102, 'lon': 85.2799, 'name': 'Jharkhand, India', 'region': 'India'},
+    'karnataka': {'lat': 15.3173, 'lon': 75.7139, 'name': 'Karnataka, India', 'region': 'India'},
+    'kerala': {'lat': 10.8505, 'lon': 76.2711, 'name': 'Kerala, India', 'region': 'India'},
+    'madhya pradesh': {'lat': 22.9734, 'lon': 78.6569, 'name': 'Madhya Pradesh, India', 'region': 'India'},
+    'maharashtra': {'lat': 19.7515, 'lon': 75.7139, 'name': 'Maharashtra, India', 'region': 'India'},
+    'manipur': {'lat': 24.6637, 'lon': 93.9063, 'name': 'Manipur, India', 'region': 'India'},
+    'meghalaya': {'lat': 25.4670, 'lon': 91.3662, 'name': 'Meghalaya, India', 'region': 'India'},
+    'mizoram': {'lat': 23.1645, 'lon': 92.9376, 'name': 'Mizoram, India', 'region': 'India'},
+    'nagaland': {'lat': 26.1584, 'lon': 94.5624, 'name': 'Nagaland, India', 'region': 'India'},
+    'odisha': {'lat': 20.9517, 'lon': 85.0985, 'name': 'Odisha, India', 'region': 'India'},
+    'punjab': {'lat': 31.1471, 'lon': 75.3412, 'name': 'Punjab, India', 'region': 'India'},
+    'rajasthan': {'lat': 27.0238, 'lon': 74.2179, 'name': 'Rajasthan, India', 'region': 'India'},
+    'sikkim': {'lat': 27.5330, 'lon': 88.5122, 'name': 'Sikkim, India', 'region': 'India'},
+    'tamil nadu': {'lat': 11.1271, 'lon': 78.6569, 'name': 'Tamil Nadu, India', 'region': 'India'},
+    'telangana': {'lat': 18.1124, 'lon': 79.0193, 'name': 'Telangana, India', 'region': 'India'},
+    'tripura': {'lat': 23.9408, 'lon': 91.9882, 'name': 'Tripura, India', 'region': 'India'},
+    'uttar pradesh': {'lat': 26.8467, 'lon': 80.9462, 'name': 'Uttar Pradesh, India', 'region': 'India'},
+    'uttarakhand': {'lat': 30.0668, 'lon': 79.0193, 'name': 'Uttarakhand, India', 'region': 'India'},
+    'west bengal': {'lat': 22.9868, 'lon': 87.8550, 'name': 'West Bengal, India', 'region': 'India'},
+    'delhi': {'lat': 28.7041, 'lon': 77.1025, 'name': 'Delhi, India', 'region': 'India'},
+    'jammu and kashmir': {'lat': 33.7782, 'lon': 76.5762, 'name': 'Jammu and Kashmir, India', 'region': 'India'},
+    'ladakh': {'lat': 34.1526, 'lon': 77.5771, 'name': 'Ladakh, India', 'region': 'India'}
 }
 
 # Global state
@@ -298,7 +330,7 @@ def parse_rss_feeds():
     for feed_url in NEWS_SOURCES['rss_feeds']:
         try:
             feed = feedparser.parse(feed_url)
-            for entry in feed.entries[:5]:
+            for entry in feed.entries:
                 title = entry.get('title', '')
                 summary = entry.get('summary', '') or entry.get('description', '')
                 if not title or not summary: continue
@@ -437,5 +469,5 @@ if __name__ == '__main__':
     
     time.sleep(1) # Let flask bind
     
-    webview.create_window('OBSIDIAN SIGINT TERMINAL', 'http://127.0.0.1:5000/')
+    webview.create_window('OSINT EDUCATIONAL TRACKER', 'http://127.0.0.1:5000/')
     webview.start()
