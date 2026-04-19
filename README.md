@@ -55,8 +55,8 @@ This application includes hardened security settings:
 
 **Dependency Updates:**
 - Flask 3.1.3 - Stable REST API framework
-- Flask-CORS 5.0.0 - CORS support with security patches
-- Requests 2.32.3 - Secure HTTP client library with vulnerability fixes
+- Flask-CORS 6.0.2 - CORS support with all security patches and regex/case-sensitivity fixes
+- Requests 2.33.0 - Secure HTTP client library with .netrc leak and temp file reuse fixes
 
 ### Configuration Notes
 **⚠️ For Production Deployment:**
