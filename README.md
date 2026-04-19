@@ -44,7 +44,7 @@ This application includes hardened security settings:
 - Restricted to specified origins (default: `localhost:3000`, `localhost:5000`)
 - Limited HTTP methods (GET, POST, OPTIONS)
 - No wildcard origins or credentials by default
-- Updated to Flask-CORS 4.0.0 with CORS security features
+- Updated to Flask-CORS 5.0.0 with security and CORS improvements
 
 **Session Security:**
 - HttpOnly cookies prevent JavaScript access
@@ -55,8 +55,8 @@ This application includes hardened security settings:
 
 **Dependency Updates:**
 - Flask 3.1.3 - Stable REST API framework
-- Flask-CORS 4.0.0 - CORS support and security features
-- Requests 2.31.0 - Reliable HTTP client library
+- Flask-CORS 5.0.0 - CORS support with security patches
+- Requests 2.32.3 - Secure HTTP client library with vulnerability fixes
 
 ### Configuration Notes
 **⚠️ For Production Deployment:**

@@ -2,7 +2,7 @@
 
 # OBSIDIAN OSINT - Automated Setup Script for macOS/Linux
 # This script automatically installs and configures the entire system
-# Security Updates: Flask 3.1.3, Flask-CORS 4.0.0, Requests 2.31.0
+# Security Updates: Flask 3.1.3, Flask-CORS 5.0.0, Requests 2.32.3
 
 echo ""
 echo "============================================"

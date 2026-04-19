@@ -50,11 +50,11 @@ def install_dependencies():
     
     # Get the appropriate pip command based on OS
     if platform.system() == "Windows":
-        pip_cmd = [".venv\\Scripts\\python.exe", "-m", "pip", "install", "--upgrade", "pip"]
-        req_cmd = [".venv\\Scripts\\python.exe", "-m", "pip", "install", "-r", "requirements.txt"]
+        pip_cmd = [sys.executable, "-m", "pip", "install", "--upgrade", "pip"]
+        req_cmd = [sys.executable, "-m", "pip", "install", "-r", "requirements.txt"]
     else:
-        pip_cmd = [".venv/bin/python", "-m", "pip", "install", "--upgrade", "pip"]
-        req_cmd = [".venv/bin/python", "-m", "pip", "install", "-r", "requirements.txt"]
+        pip_cmd = [sys.executable, "-m", "pip", "install", "--upgrade", "pip"]
+        req_cmd = [sys.executable, "-m", "pip", "install", "-r", "requirements.txt"]
     
     try:
         subprocess.run(pip_cmd, check=True, capture_output=True)
