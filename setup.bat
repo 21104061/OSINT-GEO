@@ -1,7 +1,7 @@
 @echo off
 REM OBSIDIAN OSINT - Automated Setup Script for Windows
 REM This script automatically installs and configures the entire system
-REM Security Updates: Flask 3.1.4, Flask-CORS 5.1.0, Requests 2.33.0
+REM Security Updates: Flask 3.1.3, Flask-CORS 4.0.0, Requests 2.31.0
 
 setlocal enabledelayedexpansion
 
@@ -52,8 +52,8 @@ if errorlevel 1 (
     exit /b 1
 )
 
-pip install --upgrade pip
-pip install -r requirements.txt
+python -m pip install --upgrade pip
+python -m pip install -r requirements.txt
 if errorlevel 1 (
     echo ERROR: Failed to install dependencies
     pause

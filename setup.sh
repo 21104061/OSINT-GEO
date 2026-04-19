@@ -2,7 +2,7 @@
 
 # OBSIDIAN OSINT - Automated Setup Script for macOS/Linux
 # This script automatically installs and configures the entire system
-# Security Updates: Flask 3.1.4, Flask-CORS 5.1.0, Requests 2.33.0
+# Security Updates: Flask 3.1.3, Flask-CORS 4.0.0, Requests 2.31.0
 
 echo ""
 echo "============================================"
@@ -45,8 +45,8 @@ if [ $? -ne 0 ]; then
     exit 1
 fi
 
-pip install --upgrade pip
-pip install -r requirements.txt
+python -m pip install --upgrade pip
+python -m pip install -r requirements.txt
 if [ $? -ne 0 ]; then
     echo "ERROR: Failed to install dependencies"
     exit 1

@@ -44,7 +44,7 @@ This application includes hardened security settings:
 - Restricted to specified origins (default: `localhost:3000`, `localhost:5000`)
 - Limited HTTP methods (GET, POST, OPTIONS)
 - No wildcard origins or credentials by default
-- Updated to Flask-CORS 5.1.0 with case sensitivity and regex matching fixes
+- Updated to Flask-CORS 4.0.0 with CORS security features
 
 **Session Security:**
 - HttpOnly cookies prevent JavaScript access
@@ -54,9 +54,9 @@ This application includes hardened security settings:
 - Proper `Vary: Cookie` headers for cache control
 
 **Dependency Updates:**
-- Flask 3.1.4 - Session signing key and Vary header fixes
-- Flask-CORS 5.1.0 - CORS header and matching vulnerabilities patched
-- Requests 2.33.0 - .netrc leak and temp file reuse vulnerabilities fixed
+- Flask 3.1.3 - Stable REST API framework
+- Flask-CORS 4.0.0 - CORS support and security features
+- Requests 2.31.0 - Reliable HTTP client library
 
 ### Configuration Notes
 **⚠️ For Production Deployment:**
@@ -126,7 +126,7 @@ source .venv/bin/activate
 ```bash
 pip install -r requirements.txt
 ```
-*(Dependencies include: feedparser, geopy, geotext, flask, flask-cors, apscheduler)*
+*(Dependencies include: feedparser, geopy, geotext, flask, flask-cors, apscheduler, pywebview)*
 
 #### 3. **Launch Intelligence Backend**
 Start the background daemon process bridging the REST API to your intelligence gatherer.
